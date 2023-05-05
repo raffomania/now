@@ -12,6 +12,8 @@ description = "A Gleam project"
 [dependencies]
 gleam_stdlib = "~> 0.28"
 mist = "~> 0.11"
+nakai = "~> 0.6"
+sqlight = "~> 0.6"
 
 [dev-dependencies]
 gleeunit = "~> 0.10"
