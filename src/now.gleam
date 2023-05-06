@@ -3,20 +3,24 @@ import mist
 import gleam/http/response
 import gleam/bit_builder
 import gleam/erlang/process
+import gleam/erlang/os
+import gleam/result
+import gleam/int
+import routes
 
 pub fn main() {
-  let assert Ok(_) =
-    mist.run_service(
-      3050,
-      fn(_req) {
-        response.new(200)
-        |> response.set_header("content-type", "text/html; charset=utf-8")
-        |> response.set_body(bit_builder.from_string("tets"))
-      },
-      max_body_limit: 4000,
-    )
+  let port = load_port()
 
-  io.println("http://localhost:3050")
+  let assert Ok(_) =
+    mist.run_service(port, routes.handle_request, max_body_limit: 4000)
+
+  io.println("Listening on http://localhost:" <> int.to_string(port))
 
   process.sleep_forever()
+}
+
+fn load_port() -> Int {
+  os.get_env("PORT")
+  |> result.then(int.parse)
+  |> result.unwrap(3050)
 }
