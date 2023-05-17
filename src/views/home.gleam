@@ -13,7 +13,6 @@ pub fn view(entriess: List(entries.Entry)) -> h.Node(_) {
   h.body(
     [],
     [
-      h.h1_text([], "Bonjour"),
       h.form(
         [a.action("/entries"), a.Attr("method", "POST")],
         [text_input("name", "Add Entry")],

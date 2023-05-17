@@ -3,7 +3,6 @@ import gleam/dynamic
 import gleam/result
 import gleam/list
 import gleam/map
-import gleam/io
 import snag
 
 pub type Create {
