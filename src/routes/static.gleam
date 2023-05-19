@@ -8,7 +8,7 @@ import gleam/string
 pub fn handle(request: Request(in)) -> Response(BitBuilder) {
   let path =
     string.concat([
-      "priv",
+      priv_directory(),
       string.replace(in: request.path, each: "..", with: ""),
     ])
 
@@ -23,3 +23,6 @@ pub fn handle(request: Request(in)) -> Response(BitBuilder) {
     Error(_) -> Response(404, [], bit_builder.new())
   }
 }
+
+external fn priv_directory() -> String =
+  "now_ffi" "priv_directory"
