@@ -10,14 +10,24 @@ pub fn view(entriess: List(entries.Entry)) -> h.Node(_) {
     |> list.map(fn(e) { h.li([], [e]) })
   let rendered_entry_list = h.ul([], rendered_entries)
 
+  let styles =
+    ["/static/preflight.css", "/static/main.css"]
+    |> list.map(fn(file) { h.link([a.href(file), a.rel("stylesheet")]) })
+
   h.body(
     [],
     [
-      h.form(
-        [a.action("/entries"), a.Attr("method", "POST")],
-        [text_input("name", "Add Entry")],
+      h.Head(styles),
+      h.main(
+        [],
+        [
+          h.form(
+            [a.action("/entries"), a.Attr("method", "POST")],
+            [text_input("name", "Add Entry")],
+          ),
+          rendered_entry_list,
+        ],
       ),
-      rendered_entry_list,
     ],
   )
 }
@@ -30,7 +40,7 @@ fn text_input(name: String, label: String) {
   h.div(
     [],
     [
-      h.label([a.for(name)], [h.Text(label)]),
+      h.label([a.for(name), a.Attr("hidden", "true")], [h.Text(label)]),
       h.input([a.type_("text"), a.name(name), a.id(name)]),
     ],
   )

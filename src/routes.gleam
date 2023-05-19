@@ -4,7 +4,6 @@ import gleam/http/request.{Request}
 import gleam/bit_builder.{BitBuilder}
 import database/entries
 import database
-import gleam/io
 import gleam/bit_string
 import views/home
 import nakai
@@ -38,7 +37,6 @@ fn entries(req: Request(String)) -> Response(String) {
 fn home(_req: Request(_)) -> Response(String) {
   use db <- database.open()
   let assert Ok(entries) = entries.list(db)
-  io.debug(entries)
   let body =
     home.view(entries)
     |> nakai.to_string()

@@ -1,3 +1,20 @@
+html {
+    background-color: #fdfdfd;
+}
+
 body {
-    background-color: #fafafa;
+    /* Debug lines for vertical spacing */
+    background: repeating-linear-gradient(#bbb 0, transparent .03rem, transparent 0.47rem, #eee .5rem, transparent .53rem, transparent .97rem, #bbb 1rem);
+}
+
+main {
+    max-width: 60ch;
+    margin: 0 auto;
+    padding: 4rem 1rem;
+}
+
+form input {
+    width: 100%;
+    height: calc(3rem);
+    padding: 0 1rem;
 }
