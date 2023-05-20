@@ -1,21 +1,20 @@
 import nakai/html as h
 import nakai/html/attrs as a
-import database/entries
+import entries/db_entries
 import gleam/list
 import gleam/string
 import gleam/pair
-import gleam/map
 import gleam/int
 
 type ViewEntry {
   SingleViewEntry(name: String, start: Int, end: Int, indent: Int)
 }
 
-fn entry_to_view_entry(entry: entries.Entry) -> ViewEntry {
+fn entry_to_view_entry(entry: db_entries.Entry) -> ViewEntry {
   SingleViewEntry(name: entry.name, start: 0, end: 4, indent: 0)
 }
 
-pub fn view(entries: List(entries.Entry)) -> h.Node(_) {
+pub fn view(entries: List(db_entries.Entry)) -> h.Node(_) {
   let rendered_entries =
     entries
     |> list.map(entry_to_view_entry)
