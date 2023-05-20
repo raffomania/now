@@ -33,6 +33,7 @@ form input {
 .entry {
     display: flex;
     position: absolute;
+    min-height: 2rem;
 }
 
 .entry p {
@@ -44,4 +45,5 @@ form input {
     border-radius: 0.125rem;
     background-color: black;
     width: 0.25rem;
+    padding: 0.125rem 0;
 }

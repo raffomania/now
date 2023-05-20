@@ -8,6 +8,7 @@ import views/home
 import nakai
 import routes/static
 import entries/db_entries
+import entries/debug
 
 fn html_header(res: Response(_)) -> Response(_) {
   response.set_header(res, "content-type", "text/html; charset=utf-8")
@@ -36,7 +37,8 @@ fn entries(req: Request(String)) -> Response(String) {
 
 fn home(_req: Request(_)) -> Response(String) {
   use db <- database.open()
-  let assert Ok(entries) = db_entries.list(db)
+  // let assert Ok(entries) = db_entries.list(db)
+  let entries = debug.test_data_entries()
   let body =
     home.view(entries)
     |> nakai.to_string()

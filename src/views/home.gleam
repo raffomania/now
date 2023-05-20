@@ -1,26 +1,22 @@
 import nakai/html as h
 import nakai/html/attrs as a
-import entries/db_entries
+import entries/timeline
+import entries/debug
 import gleam/list
+import gleam/float
+import gleam/io
 import gleam/string
 import gleam/pair
 import gleam/int
+import gleam/map
 
-type ViewEntry {
-  SingleViewEntry(name: String, start: Int, end: Int, indent: Int)
-}
-
-fn entry_to_view_entry(entry: db_entries.Entry) -> ViewEntry {
-  SingleViewEntry(name: entry.name, start: 0, end: 4, indent: 0)
-}
-
-pub fn view(entries: List(db_entries.Entry)) -> h.Node(_) {
+pub fn view(entries: List(debug.Entry)) -> h.Node(_) {
   let rendered_entries =
     entries
-    |> list.map(entry_to_view_entry)
+    |> list.fold(timeline.new(), timeline.add_entry)
+    |> map.values()
+    |> io.debug()
     |> list.map(entry)
-    |> list.map(fn(e) { h.li([], [e]) })
-  let rendered_entry_list = h.ul([], rendered_entries)
 
   let styles =
     ["/static/preflight.css", "/static/main.css"]
@@ -37,7 +33,7 @@ pub fn view(entries: List(db_entries.Entry)) -> h.Node(_) {
             [a.action("/entries"), a.Attr("method", "POST")],
             [text_input("name", "Add Entry")],
           ),
-          h.div([a.class("entries-container")], [rendered_entry_list]),
+          h.div([a.class("entries-container")], rendered_entries),
         ],
       ),
     ],
@@ -62,12 +58,17 @@ fn style_from_map(styles: List(#(String, String))) -> String {
   |> string.concat
 }
 
-fn entry(entry: ViewEntry) -> h.Node(_) {
+fn entry(entry: timeline.Line) -> h.Node(_) {
+  let x_scale = 0.5
+  let y_scale = 2.5
+  let top = int.to_float(entry.start) *. y_scale
+  let height = int.to_float(entry.end - entry.start) *. y_scale
+  let left = int.to_float(entry.indent) *. x_scale
   let style =
     style_from_map([
-      #("top", int.to_string(entry.start) <> "rem"),
-      #("left", int.to_string(entry.indent) <> "rem"),
-      #("height", int.to_string(entry.end - entry.start) <> "rem"),
+      #("top", float.to_string(top) <> "rem"),
+      #("height", float.to_string(height) <> "rem"),
+      #("left", float.to_string(left) <> "rem"),
     ])
   h.div(
     [a.class("entry"), a.style(style)],
