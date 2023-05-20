@@ -1,3 +1,5 @@
+/* Basics */
+
 html {
     background-color: #fdfdfd;
 }
@@ -13,8 +15,33 @@ main {
     padding: 4rem 1rem;
 }
 
+/* Add entry form */
+
 form input {
     width: 100%;
     height: calc(3rem);
     padding: 0 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Entries */
+
+.entries-container {
+    position: relative;
+}
+
+.entry {
+    display: flex;
+    position: absolute;
+}
+
+.entry p {
+    margin: 0.25rem 0.5rem;
+}
+
+.line {
+    height: 100%;
+    border-radius: 0.125rem;
+    background-color: black;
+    width: 0.25rem;
 }
