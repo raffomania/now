@@ -1,8 +1,7 @@
 import gleam/int
-import gleam/set
 import gleam/list
 import gleam/map
-import gleam/io
+import gleam/result
 import gleam/option
 import entries/debug
 
@@ -53,4 +52,23 @@ fn add_entry_to_line(line: Line, new_entry: debug.Entry) -> Line {
   let new_start = int.min(line.start, new_entry.position)
   let new_end = int.max(line.end, new_entry.position)
   Line(..line, start: new_start, end: new_end)
+}
+
+pub type Label {
+  Label(names: List(String), position: Int, indent: Int)
+}
+
+pub fn labels(timeline: Timeline) -> List(Label) {
+  timeline
+  |> map.values()
+  |> list.group(fn(line) { line.start })
+  |> map.map_values(fn(position, lines) {
+    let names = list.map(lines, fn(line) { line.name })
+    let indent =
+      lines
+      |> list.map(fn(line) { line.indent })
+      |> list.fold(0, int.max)
+    Label(position: position, names: names, indent: indent)
+  })
+  |> map.values()
 }

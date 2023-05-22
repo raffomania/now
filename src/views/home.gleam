@@ -4,19 +4,27 @@ import entries/timeline
 import entries/debug
 import gleam/list
 import gleam/float
-import gleam/io
 import gleam/string
 import gleam/pair
 import gleam/int
 import gleam/map
 
+const x_scale = 0.5
+
+const y_scale = 2.5
+
 pub fn view(entries: List(debug.Entry)) -> h.Node(_) {
-  let rendered_entries =
+  let timeline =
     entries
     |> list.fold(timeline.new(), timeline.add_entry)
+  let rendered_entries =
+    timeline
     |> map.values()
-    |> io.debug()
-    |> list.map(entry)
+    |> list.map(render_line)
+
+  let rendered_labels =
+    timeline.labels(timeline)
+    |> list.map(render_label)
 
   let styles =
     ["/static/preflight.css", "/static/main.css"]
@@ -33,7 +41,10 @@ pub fn view(entries: List(debug.Entry)) -> h.Node(_) {
             [a.action("/entries"), a.Attr("method", "POST")],
             [text_input("name", "Add Entry")],
           ),
-          h.div([a.class("entries-container")], rendered_entries),
+          h.div(
+            [a.class("entries-container")],
+            list.append(rendered_entries, rendered_labels),
+          ),
         ],
       ),
     ],
@@ -50,17 +61,7 @@ fn text_input(name: String, label: String) {
   )
 }
 
-fn style_from_map(styles: List(#(String, String))) -> String {
-  styles
-  |> list.map(fn(style) {
-    string.concat([pair.first(style), ": ", pair.second(style), "; "])
-  })
-  |> string.concat
-}
-
-fn entry(entry: timeline.Line) -> h.Node(_) {
-  let x_scale = 0.5
-  let y_scale = 2.5
+fn render_line(entry: timeline.Line) -> h.Node(_) {
   let top = int.to_float(entry.start) *. y_scale
   let height = int.to_float(entry.end - entry.start) *. y_scale
   let left = int.to_float(entry.indent) *. x_scale
@@ -70,8 +71,28 @@ fn entry(entry: timeline.Line) -> h.Node(_) {
       #("height", float.to_string(height) <> "rem"),
       #("left", float.to_string(left) <> "rem"),
     ])
-  h.div(
-    [a.class("entry"), a.style(style)],
-    [h.div([a.class("line")], []), h.p([], [h.Text(entry.name)])],
-  )
+
+  h.div([a.class("line"), a.style(style)], [])
+}
+
+fn render_label(label: timeline.Label) -> h.Node(_) {
+  let top = int.to_float(label.position) *. y_scale
+  let left = int.to_float(label.indent) *. x_scale
+  let style =
+    style_from_map([
+      #("top", float.to_string(top) <> "rem"),
+      #("left", float.to_string(left) <> "rem"),
+    ])
+
+  let text = string.join(label.names, ", ")
+
+  h.p([a.class("entry-label"), a.style(style)], [h.Text(text)])
+}
+
+fn style_from_map(styles: List(#(String, String))) -> String {
+  styles
+  |> list.map(fn(style) {
+    string.concat([pair.first(style), ": ", pair.second(style), "; "])
+  })
+  |> string.concat
 }
