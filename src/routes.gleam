@@ -36,7 +36,7 @@ fn entries(req: Request(String)) -> Response(String) {
 }
 
 fn home(_req: Request(_)) -> Response(String) {
-  use db <- database.open()
+  use _db <- database.open()
   // let assert Ok(entries) = db_entries.list(db)
   let entries = debug.test_data_entries()
   let body =

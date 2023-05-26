@@ -1,7 +1,6 @@
 import gleam/int
 import gleam/list
 import gleam/map
-import gleam/result
 import gleam/option
 import entries/debug
 
