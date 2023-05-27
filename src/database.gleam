@@ -1,4 +1,7 @@
 import sqlight
+import gleam/dynamic
+import gleam/result
+import birl/time
 
 pub fn open(next: fn(sqlight.Connection) -> a) -> a {
   use db <- sqlight.with_connection("now.sqlite")
@@ -15,11 +18,11 @@ pub fn migrate_schema(db: sqlight.Connection) {
         primary key 
         autoincrement 
         not null,
-      datetime integer
-        not null,
       project_id integer 
         not null 
         references projects(id),
+      datetime integer
+        not null,
       note text
     ) strict;
 
@@ -31,4 +34,11 @@ pub fn migrate_schema(db: sqlight.Connection) {
     ) strict;
     "
   |> sqlight.exec(db)
+}
+
+pub fn decode_unix_timestamp(
+  data: dynamic.Dynamic,
+) -> Result(time.DateTime, List(dynamic.DecodeError)) {
+  dynamic.int(data)
+  |> result.map(time.from_unix)
 }

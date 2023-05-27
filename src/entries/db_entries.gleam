@@ -2,45 +2,49 @@ import sqlight
 import gleam/dynamic
 import gleam/result
 import gleam/list
-import gleam/map
 import snag
-
-pub type Create {
-  Create(name: String)
-}
+import birl/time
+import database
+import gleam/option
 
 pub type Entry {
-  Entry(id: Int, name: String)
+  Entry(
+    id: Int,
+    project_id: Int,
+    datetime: time.DateTime,
+    note: option.Option(String),
+  )
 }
 
-pub fn create_from_body(
-  body: List(#(String, String)),
-) -> Result(Create, dynamic.DecodeErrors) {
-  map.from_list(body)
-  |> dynamic.from
-  |> dynamic.decode1(Create, dynamic.field("name", dynamic.string))
+pub type Create {
+  Create(project_id: Int, datetime: time.DateTime)
 }
 
 fn entry_from_row() {
-  dynamic.decode2(
+  dynamic.decode4(
     Entry,
     dynamic.element(0, dynamic.int),
-    dynamic.element(1, dynamic.string),
+    dynamic.element(1, dynamic.int),
+    dynamic.element(2, database.decode_unix_timestamp),
+    dynamic.optional(dynamic.element(3, dynamic.string)),
   )
 }
 
 pub fn insert(entry: Create, db: sqlight.Connection) -> snag.Result(Int) {
   "
     insert into entries
-      (name)
+      (datetime, project_id)
     values
-      ($1)
+      ($1, $2)
     returning
       id
   "
   |> sqlight.query(
     on: db,
-    with: [sqlight.text(entry.name)],
+    with: [
+      sqlight.int(time.to_unix(entry.datetime)),
+      sqlight.int(entry.project_id),
+    ],
     expecting: dynamic.element(0, dynamic.int),
   )
   |> result.map_error(fn(e) {

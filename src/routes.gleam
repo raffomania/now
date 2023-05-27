@@ -1,5 +1,4 @@
 import gleam/http/response.{Response}
-import gleam/uri
 import gleam/http/request.{Request}
 import gleam/bit_builder.{BitBuilder}
 import database
@@ -7,8 +6,8 @@ import gleam/bit_string
 import views/home
 import nakai
 import routes/static
-import entries/db_entries
 import entries/debug
+import entries
 
 fn html_header(res: Response(_)) -> Response(_) {
   response.set_header(res, "content-type", "text/html; charset=utf-8")
@@ -22,17 +21,13 @@ pub fn handle_request(req: Request(BitString)) -> Response(BitBuilder) {
     segments ->
       case segments {
         [] -> home(req)
-        ["entries"] -> entries(req)
+        ["entries"] -> entries.handle(req)
         _ -> response.new(404)
       }
       |> response.map(bit_builder.from_string)
   }
 
   string_response
-}
-
-fn entries(req: Request(String)) -> Response(String) {
-  create_entry(req)
 }
 
 fn home(_req: Request(_)) -> Response(String) {
@@ -45,13 +40,4 @@ fn home(_req: Request(_)) -> Response(String) {
   response.new(200)
   |> html_header()
   |> response.set_body(body)
-}
-
-fn create_entry(request: Request(String)) -> Response(String) {
-  let assert Ok(body) = uri.parse_query(request.body)
-  let assert Ok(create) = db_entries.create_from_body(body)
-  use db <- database.open()
-  let assert Ok(_id) = db_entries.insert(create, db)
-
-  response.redirect("/")
 }
