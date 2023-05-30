@@ -1,7 +1,7 @@
 import nakai/html as h
 import nakai/html/attrs as a
 import entries/timeline
-import entries/debug
+import entries/db_entries
 import gleam/list
 import gleam/float
 import gleam/string
@@ -13,7 +13,7 @@ const x_scale = 0.5
 
 const y_scale = 2.5
 
-pub fn view(entries: List(debug.Entry)) -> h.Node(_) {
+pub fn view(entries: List(db_entries.Entry)) -> h.Node(_) {
   let timeline =
     entries
     |> list.fold(timeline.new(), timeline.add_entry)

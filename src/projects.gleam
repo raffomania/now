@@ -4,8 +4,11 @@ import gleam/dynamic
 import gleam/result
 import gleam/list
 
+pub type Id =
+  Int
+
 pub type Project {
-  Project(id: Int, name: String)
+  Project(id: Id, name: String)
 }
 
 pub type Create {

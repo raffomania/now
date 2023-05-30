@@ -1,12 +1,12 @@
 import gleam/http/response.{Response}
 import gleam/http/request.{Request}
 import gleam/bit_builder.{BitBuilder}
+import entries/db_entries
 import database
 import gleam/bit_string
 import views/home
 import nakai
 import routes/static
-import entries/debug
 import entries
 
 fn html_header(res: Response(_)) -> Response(_) {
@@ -31,9 +31,8 @@ pub fn handle_request(req: Request(BitString)) -> Response(BitBuilder) {
 }
 
 fn home(_req: Request(_)) -> Response(String) {
-  use _db <- database.open()
-  // let assert Ok(entries) = db_entries.list(db)
-  let entries = debug.test_data_entries()
+  use db <- database.open()
+  let assert Ok(entries) = db_entries.list(db)
   let body =
     home.view(entries)
     |> nakai.to_string()

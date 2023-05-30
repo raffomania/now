@@ -26,7 +26,7 @@ fn entry_from_row() {
     dynamic.element(0, dynamic.int),
     dynamic.element(1, dynamic.int),
     dynamic.element(2, database.decode_unix_timestamp),
-    dynamic.optional(dynamic.element(3, dynamic.string)),
+    dynamic.element(3, dynamic.optional(dynamic.string)),
   )
 }
 
@@ -47,18 +47,15 @@ pub fn insert(entry: Create, db: sqlight.Connection) -> snag.Result(Int) {
     ],
     expecting: dynamic.element(0, dynamic.int),
   )
-  |> result.map_error(fn(e) {
-    snag.new("Query failed")
-    |> snag.layer(e.message)
-  })
+  |> database.result_to_snag()
   |> result.then(fn(rows) {
     list.first(rows)
     |> result.replace_error(snag.new("Database response was empty"))
   })
 }
 
-pub fn list(db: sqlight.Connection) -> Result(List(Entry), Nil) {
+pub fn list(db: sqlight.Connection) -> snag.Result(List(Entry)) {
   "select * from entries"
   |> sqlight.query(on: db, with: [], expecting: entry_from_row())
-  |> result.replace_error(Nil)
+  |> database.result_to_snag()
 }

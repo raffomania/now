@@ -1,4 +1,5 @@
 import sqlight
+import snag
 import gleam/dynamic
 import gleam/result
 import birl/time
@@ -41,4 +42,8 @@ pub fn decode_unix_timestamp(
 ) -> Result(time.DateTime, List(dynamic.DecodeError)) {
   dynamic.int(data)
   |> result.map(time.from_unix)
+}
+
+pub fn result_to_snag(result: Result(res, sqlight.Error)) -> snag.Result(res) {
+  result.map_error(result, fn(error) { snag.new(error.message) })
 }

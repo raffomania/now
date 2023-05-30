@@ -1,32 +1,35 @@
 import gleam/int
+import entries/db_entries
+import birl/time
+import gleam/io
 import gleam/list
 import gleam/map
 import gleam/option
-import entries/debug
+import projects
 
 pub type Line {
   Line(name: String, start: Int, end: Int, indent: Int)
 }
 
 pub type Timeline =
-  map.Map(String, Line)
+  map.Map(projects.Id, Line)
 
 pub fn new() -> Timeline {
   map.new()
 }
 
-pub fn add_entry(timeline: Timeline, new_entry: debug.Entry) -> Timeline {
+pub fn add_entry(timeline: Timeline, new_entry: db_entries.Entry) -> Timeline {
   map.update(
     timeline,
-    new_entry.name,
+    new_entry.project_id,
     fn(maybe_line) {
       let line = case maybe_line {
         option.Some(line) -> add_entry_to_line(line, new_entry)
         option.None ->
           Line(
-            name: new_entry.name,
-            start: new_entry.position,
-            end: new_entry.position,
+            name: int.to_string(new_entry.project_id),
+            start: date_to_grid_position(new_entry.datetime),
+            end: date_to_grid_position(new_entry.datetime),
             indent: 0,
           )
       }
@@ -47,9 +50,21 @@ pub fn overlapping(a: Line, b: Line) -> Bool {
   a.start <= b.end && a.end >= b.start
 }
 
-fn add_entry_to_line(line: Line, new_entry: debug.Entry) -> Line {
-  let new_start = int.min(line.start, new_entry.position)
-  let new_end = int.max(line.end, new_entry.position)
+fn date_to_grid_position(date_time: time.DateTime) -> Int {
+  let to_bucket = fn(date_time: time.DateTime) -> Int {
+    let time.Date(year, month, _day) = time.get_date(date_time)
+    year * 12 + month
+  }
+
+  let now_month = to_bucket(time.now())
+  let date_month = to_bucket(date_time)
+
+  now_month - date_month
+}
+
+fn add_entry_to_line(line: Line, new_entry: db_entries.Entry) -> Line {
+  let new_start = int.min(line.start, date_to_grid_position(new_entry.datetime))
+  let new_end = int.max(line.end, date_to_grid_position(new_entry.datetime))
   Line(..line, start: new_start, end: new_end)
 }
 
