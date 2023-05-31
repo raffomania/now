@@ -27,7 +27,7 @@ pub fn insert(create: Create, db: sqlight.Connection) -> snag.Result(Project) {
   |> sqlight.query(
     on: db,
     with: [sqlight.text(create.name)],
-    expecting: decode_row(),
+    expecting: decode_row(0),
   )
   |> result.map_error(fn(e) {
     snag.new("Query failed")
@@ -39,11 +39,11 @@ pub fn insert(create: Create, db: sqlight.Connection) -> snag.Result(Project) {
   })
 }
 
-fn decode_row() {
+pub fn decode_row(offset: Int) {
   dynamic.decode2(
     Project,
-    dynamic.element(0, dynamic.int),
-    dynamic.element(1, dynamic.string),
+    dynamic.element(0 + offset, dynamic.int),
+    dynamic.element(1 + offset, dynamic.string),
   )
 }
 
@@ -56,7 +56,7 @@ pub fn find_by_fuzzy_name(
     where lower(name) = lower($1) 
     limit 1
   "
-  |> sqlight.query(on: db, with: [sqlight.text(name)], expecting: decode_row())
+  |> sqlight.query(on: db, with: [sqlight.text(name)], expecting: decode_row(0))
   |> result.replace_error(Nil)
   |> result.then(list.first)
 }

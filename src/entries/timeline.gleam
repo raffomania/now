@@ -1,7 +1,6 @@
 import gleam/int
 import entries/db_entries
 import birl/time
-import gleam/io
 import gleam/list
 import gleam/map
 import gleam/option
@@ -18,18 +17,21 @@ pub fn new() -> Timeline {
   map.new()
 }
 
-pub fn add_entry(timeline: Timeline, new_entry: db_entries.Entry) -> Timeline {
+pub fn add_entry(
+  timeline: Timeline,
+  new_entry: db_entries.EntryWithProject,
+) -> Timeline {
   map.update(
     timeline,
-    new_entry.project_id,
+    new_entry.entry.project_id,
     fn(maybe_line) {
       let line = case maybe_line {
-        option.Some(line) -> add_entry_to_line(line, new_entry)
+        option.Some(line) -> add_entry_to_line(line, new_entry.entry)
         option.None ->
           Line(
-            name: int.to_string(new_entry.project_id),
-            start: date_to_grid_position(new_entry.datetime),
-            end: date_to_grid_position(new_entry.datetime),
+            name: new_entry.project.name,
+            start: date_to_grid_position(new_entry.entry.datetime),
+            end: date_to_grid_position(new_entry.entry.datetime),
             indent: 0,
           )
       }

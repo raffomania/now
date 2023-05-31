@@ -13,7 +13,7 @@ const x_scale = 0.5
 
 const y_scale = 2.5
 
-pub fn view(entries: List(db_entries.Entry)) -> h.Node(_) {
+pub fn view(entries: List(db_entries.EntryWithProject)) -> h.Node(_) {
   let timeline =
     entries
     |> list.fold(timeline.new(), timeline.add_entry)

@@ -1,10 +1,12 @@
 import sqlight
+import gleam/io
 import gleam/dynamic
 import gleam/result
 import gleam/list
 import snag
 import birl/time
 import database
+import projects
 import gleam/option
 
 pub type Entry {
@@ -14,6 +16,10 @@ pub type Entry {
     datetime: time.DateTime,
     note: option.Option(String),
   )
+}
+
+pub type EntryWithProject {
+  EntryWithProject(entry: Entry, project: projects.Project)
 }
 
 pub type Create {
@@ -54,8 +60,12 @@ pub fn insert(entry: Create, db: sqlight.Connection) -> snag.Result(Int) {
   })
 }
 
-pub fn list(db: sqlight.Connection) -> snag.Result(List(Entry)) {
-  "select * from entries"
-  |> sqlight.query(on: db, with: [], expecting: entry_from_row())
+fn decode_entry_with_project() {
+  dynamic.decode2(EntryWithProject, entry_from_row(), projects.decode_row(4))
+}
+
+pub fn list(db: sqlight.Connection) -> snag.Result(List(EntryWithProject)) {
+  "select entries.*, projects.* from entries join projects on projects.id = entries.project_id"
+  |> sqlight.query(on: db, with: [], expecting: decode_entry_with_project())
   |> database.result_to_snag()
 }
