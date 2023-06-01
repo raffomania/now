@@ -6,14 +6,11 @@ import gleam/result
 import gleam/int
 import routes
 import database
-import entries/debug
 
 pub fn main() {
   let port = load_port()
   use db <- database.open()
   let assert Ok(_) = database.migrate_schema(db)
-
-  let assert Ok(_) = debug.seed(db)
 
   let assert Ok(_) =
     mist.run_service(port, routes.handle_request, max_body_limit: 4000)
