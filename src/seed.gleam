@@ -7,8 +7,10 @@ import gleam/result
 import sqlight
 import projects
 import snag
+import database
 
-pub fn seed(db: sqlight.Connection) -> snag.Result(Nil) {
+pub fn main() -> snag.Result(Nil) {
+  use db <- database.open()
   let entries_exist =
     db_entries.list(db)
     |> result.map(list.is_empty)
@@ -16,7 +18,10 @@ pub fn seed(db: sqlight.Connection) -> snag.Result(Nil) {
   use entries_exist <- result.try(entries_exist)
   case entries_exist {
     True -> insert_test_data(db)
-    False -> Ok(Nil)
+    False -> {
+      io.println("Database not empty, skipping seeding")
+      Ok(Nil)
+    }
   }
 }
 
