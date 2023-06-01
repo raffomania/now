@@ -1,5 +1,4 @@
 import sqlight
-import gleam/io
 import gleam/dynamic
 import gleam/result
 import gleam/list

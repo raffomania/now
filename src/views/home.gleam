@@ -33,7 +33,7 @@ pub fn view(entries: List(db_entries.EntryWithProject)) -> h.Node(_) {
   h.body(
     [],
     [
-      h.Head(styles),
+      h.Head([h.title("now"), ..styles]),
       h.main(
         [],
         [
