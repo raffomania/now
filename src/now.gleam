@@ -6,8 +6,11 @@ import gleam/result
 import gleam/int
 import routes
 import database
+import snag_extra
+import snag
 
-pub fn main() {
+pub fn main() -> snag.Result(Nil) {
+  use <- snag_extra.print_if_error()
   let port = load_port()
   use db <- database.open()
   let assert Ok(_) = database.migrate_schema(db)
@@ -18,6 +21,8 @@ pub fn main() {
   io.println("Listening on http://localhost:" <> int.to_string(port))
 
   process.sleep_forever()
+
+  Ok(Nil)
 }
 
 fn load_port() -> Int {

@@ -6,6 +6,8 @@ import gleam/map
 import gleam/option
 import projects
 
+const day_in_seconds = 86_400
+
 pub type Line {
   Line(name: String, start: Int, end: Int, indent: Int)
 }
@@ -54,8 +56,8 @@ pub fn overlapping(a: Line, b: Line) -> Bool {
 
 fn date_to_grid_position(date_time: time.DateTime) -> Int {
   let to_bucket = fn(date_time: time.DateTime) -> Int {
-    let time.Date(year, month, _day) = time.get_date(date_time)
-    year * 12 + month
+    let timestamp = time.to_unix(date_time)
+    timestamp / day_in_seconds / 7
   }
 
   let now_month = to_bucket(time.now())

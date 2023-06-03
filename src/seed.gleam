@@ -8,9 +8,12 @@ import sqlight
 import projects
 import snag
 import database
+import snag_extra
 
-pub fn main() -> snag.Result(Nil) {
+pub fn main() {
+  use <- snag_extra.print_if_error()
   use db <- database.open()
+
   let entries_exist =
     db_entries.list(db)
     |> result.map(list.is_empty)
