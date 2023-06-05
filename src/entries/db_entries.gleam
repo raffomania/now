@@ -64,7 +64,12 @@ fn decode_entry_with_project() {
 }
 
 pub fn list(db: sqlight.Connection) -> snag.Result(List(EntryWithProject)) {
-  "select entries.*, projects.* from entries join projects on projects.id = entries.project_id"
+  "
+    select entries.*, projects.* 
+    from entries 
+    join projects on projects.id = entries.project_id
+    order by datetime desc
+  "
   |> sqlight.query(on: db, with: [], expecting: decode_entry_with_project())
   |> database.result_to_snag()
 }

@@ -43,23 +43,34 @@ fn insert_test_data(db: sqlight.Connection) -> snag.Result(Nil) {
 }
 
 fn test_data_projects() -> List(projects.Create) {
-  [projects.Create("now")]
+  [projects.Create("now"), projects.Create("knakk")]
 }
 
 fn test_data_entries(
   projects: List(projects.Project),
 ) -> List(db_entries.Create) {
-  let month = duration.months(2)
+  let week = duration.weeks(1)
   let now = time.now()
-  let project_id =
+  let assert Ok(project_now) =
     list.first(projects)
     |> result.map(fn(proj) { proj.id })
-    |> result.unwrap(0)
+  let assert Ok(project_knakk) =
+    list.at(projects, 1)
+    |> result.map(fn(proj) { proj.id })
+
   [
-    db_entries.Create(datetime: now, project_id: project_id),
+    db_entries.Create(datetime: now, project_id: project_now),
     db_entries.Create(
-      datetime: time.subtract(now, month),
-      project_id: project_id,
+      datetime: time.subtract(
+        now,
+        week
+        |> duration.add(week),
+      ),
+      project_id: project_now,
+    ),
+    db_entries.Create(
+      datetime: time.subtract(now, week),
+      project_id: project_knakk,
     ),
   ]
 }
