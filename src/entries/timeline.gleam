@@ -1,4 +1,5 @@
 import gleam/int
+import gleam/result
 import entries/db_entries
 import birl/time
 import gleam/list
@@ -23,31 +24,35 @@ pub fn add_entry(
   timeline: Timeline,
   new_entry: db_entries.EntryWithProject,
 ) -> Timeline {
-  map.update(
-    timeline,
-    new_entry.entry.project_id,
-    fn(maybe_line) {
-      let line = case maybe_line {
-        option.Some(line) -> add_entry_to_line(line, new_entry.entry)
-        option.None ->
-          Line(
-            name: new_entry.project.name,
-            start: date_to_grid_position(new_entry.entry.datetime),
-            end: date_to_grid_position(new_entry.entry.datetime),
-            indent: 0,
-          )
-      }
+  use maybe_line <- map.update(timeline, new_entry.entry.project_id)
 
-      let largest_overlapping_indent =
-        map.values(timeline)
-        |> list.filter(overlapping(_, line))
-        |> list.filter(fn(other) { other.name != line.name })
-        |> list.map(fn(line) { line.indent })
-        |> list.fold(-1, int.max)
+  let line = case maybe_line {
+    option.Some(line) -> add_entry_to_line(line, new_entry.entry)
+    option.None ->
+      Line(
+        name: new_entry.project.name,
+        start: date_to_grid_position(new_entry.entry.datetime),
+        end: date_to_grid_position(new_entry.entry.datetime),
+        indent: 0,
+      )
+  }
 
-      Line(..line, indent: largest_overlapping_indent + 1)
-    },
-  )
+  let overlapping_indents =
+    map.values(timeline)
+    |> list.filter(overlapping(_, line))
+    |> list.filter(fn(other) { other.name != line.name })
+    |> list.map(fn(line) { line.indent })
+
+  let largest_overlapping_indent =
+    overlapping_indents
+    |> list.fold(0, int.max)
+
+  let first_non_overlapping_indent =
+    list.range(0, largest_overlapping_indent)
+    |> list.find(fn(indent) { !list.contains(overlapping_indents, indent) })
+    |> result.unwrap(largest_overlapping_indent + 1)
+
+  Line(..line, indent: first_non_overlapping_indent)
 }
 
 pub fn overlapping(a: Line, b: Line) -> Bool {
@@ -57,7 +62,7 @@ pub fn overlapping(a: Line, b: Line) -> Bool {
 fn date_to_grid_position(date_time: time.DateTime) -> Int {
   let to_bucket = fn(date_time: time.DateTime) -> Int {
     let timestamp = time.to_unix(date_time)
-    timestamp / day_in_seconds / 7
+    timestamp / day_in_seconds
   }
 
   let now_month = to_bucket(time.now())
