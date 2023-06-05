@@ -53,8 +53,6 @@ pub fn add_entry(
     |> list.find(fn(indent) { !list.contains(overlapping_indents, indent) })
     |> result.unwrap(largest_overlapping_indent + 1)
 
-  io.println(line.project.name <> int.to_string(first_non_overlapping_indent))
-
   Line(..line, indent: first_non_overlapping_indent)
 }
 

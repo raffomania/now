@@ -39,7 +39,7 @@ pub fn view(entries: List(db_entries.EntryWithProject)) -> h.Node(_) {
         [
           h.form(
             [a.action("/entries"), a.Attr("method", "POST")],
-            [text_input("name", "Add Entry")],
+            [text_input("text", "Add Entry")],
           ),
           h.div(
             [a.class("entries-container")],
