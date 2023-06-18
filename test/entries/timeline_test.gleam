@@ -3,7 +3,6 @@ import projects
 import entries/db_entries
 import gleeunit/should
 import gleam/option
-import gleam/list
 import gleam/map
 import birl/time
 import birl/duration
@@ -65,12 +64,18 @@ pub fn add_entry_indent_test() {
 
   let timeline =
     timeline.from_entries([
-      gen_entry(offset: 0, project: 0),
-      gen_entry(offset: 4, project: 0),
+      // The ordering is important here
+      // to test for correct sorting in the timeline
+      // logic
+      gen_entry(offset: 1, project: 0),
+      gen_entry(offset: 0, project: 1),
       gen_entry(offset: 2, project: 1),
     ])
 
+  // check that the later project has the larger indent
+  // to prevent lines overlapping with labels
+  // of later lines
   timeline
   |> to_indents()
-  |> should.equal(map.from_list([#(0, 0), #(1, 1)]))
+  |> should.equal(map.from_list([#(1, 0), #(0, 1)]))
 }
