@@ -21,23 +21,31 @@ pub fn new() -> Timeline {
   map.new()
 }
 
-pub fn add_entry(
-  timeline: Timeline,
-  new_entry: db_entries.EntryWithProject,
-) -> Timeline {
-  use maybe_line <- map.update(timeline, new_entry.entry.project_id)
+pub fn from_entries(entries: List(db_entries.EntryWithProject)) -> Timeline {
+  entries
+  |> to_lines
+  |> map.values
+  |> list.sort(fn(a, b) { int.compare(a.start, b.start) })
+  |> list.fold(new(), add_line)
+}
 
-  let line = case maybe_line {
-    option.Some(line) -> add_entry_to_line(line, new_entry.entry)
+fn to_lines(entries: List(db_entries.EntryWithProject)) -> Timeline {
+  use timeline, entry <- list.fold(entries, new())
+  use maybe_line <- map.update(timeline, entry.entry.project_id)
+
+  case maybe_line {
+    option.Some(line) -> add_entry_to_line(line, entry.entry)
     option.None ->
       Line(
-        project: new_entry.project,
-        start: date_to_grid_position(new_entry.entry.datetime),
-        end: date_to_grid_position(new_entry.entry.datetime),
+        project: entry.project,
+        start: date_to_grid_position(entry.entry.datetime),
+        end: date_to_grid_position(entry.entry.datetime),
         indent: 0,
       )
   }
+}
 
+fn add_line(timeline: Timeline, line: Line) -> Timeline {
   let overlapping_indents =
     map.values(timeline)
     |> list.filter(overlapping(_, line))
@@ -53,7 +61,11 @@ pub fn add_entry(
     |> list.find(fn(indent) { !list.contains(overlapping_indents, indent) })
     |> result.unwrap(largest_overlapping_indent + 1)
 
-  Line(..line, indent: first_non_overlapping_indent)
+  map.insert(
+    timeline,
+    line.project.id,
+    Line(..line, indent: first_non_overlapping_indent),
+  )
 }
 
 pub fn overlapping(a: Line, b: Line) -> Bool {

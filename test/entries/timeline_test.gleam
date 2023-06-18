@@ -34,7 +34,7 @@ pub fn lines_overlapping_test() {
   |> should.be_true()
 }
 
-fn gen_entry(time offset: Int, project project_id: Int) {
+fn gen_entry(offset offset: Int, project project_id: Int) {
   db_entries.EntryWithProject(
     entry: db_entries.Entry(
       id: 0,
@@ -54,18 +54,21 @@ pub fn add_entry_indent_test() {
   }
 
   let timeline =
-    timeline.new()
-    |> timeline.add_entry(gen_entry(time: 0, project: 0))
-    |> timeline.add_entry(gen_entry(time: 1, project: 0))
+    timeline.from_entries([
+      gen_entry(offset: 0, project: 0),
+      gen_entry(offset: 1, project: 0),
+    ])
 
   timeline
   |> to_indents()
   |> should.equal(map.from_list([#(0, 0)]))
 
   let timeline =
-    timeline
-    |> timeline.add_entry(gen_entry(time: 2, project: 1))
-    |> timeline.add_entry(gen_entry(time: 4, project: 0))
+    timeline.from_entries([
+      gen_entry(offset: 0, project: 0),
+      gen_entry(offset: 4, project: 0),
+      gen_entry(offset: 2, project: 1),
+    ])
 
   timeline
   |> to_indents()

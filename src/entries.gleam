@@ -1,5 +1,4 @@
 import gleam/http/response.{Response}
-import gleam/io
 import gleam/string
 import snag
 import snag_extra

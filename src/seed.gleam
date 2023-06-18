@@ -14,6 +14,8 @@ pub fn main() {
   use <- snag_extra.print_if_error()
   use db <- database.open()
 
+  let assert Ok(_) = database.migrate_schema(db)
+
   let entries_exist =
     db_entries.list(db)
     |> result.map(list.is_empty)
