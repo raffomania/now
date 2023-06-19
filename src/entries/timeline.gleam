@@ -134,7 +134,7 @@ fn entries_to_line(
     |> non_empty_list.map(fn(e) { date_to_grid_position(e.datetime) })
     |> non_empty_list.sort(int.compare)
 
-  let first_part = LinePart(start: positions.first, end: positions.first)
+  let first_part = LinePart(start: positions.first, end: positions.first + 1)
 
   let merge_or_add_part = fn(
     parts: non_empty_list.NonEmptyList(LinePart),
@@ -148,14 +148,14 @@ fn entries_to_line(
       True ->
         // Extend previous part and replace it in list
         non_empty_list.NonEmptyList(
-          first: extend_line_part(parts.first, new_position),
+          first: extend_line_part(parts.first, new_position + 1),
           rest: parts.rest,
         )
       False ->
         // Create new part and prepend it to list
         non_empty_list.prepend(
           parts,
-          LinePart(start: new_position, end: new_position),
+          LinePart(start: new_position, end: new_position + 1),
         )
     }
   }
