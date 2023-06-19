@@ -28,7 +28,7 @@ pub fn view(entries: List(db_entries.EntryWithProject)) -> h.Node(_) {
     ["/static/preflight.css", "/static/main.css"]
     |> list.map(fn(file) { h.link([a.href(file), a.rel("stylesheet")]) })
 
-  h.body(
+  h.Body(
     [],
     [
       h.Head([h.title("now"), ..styles]),
@@ -60,8 +60,9 @@ fn text_input(name: String, label: String) {
 }
 
 fn render_line(entry: timeline.Line) -> h.Node(_) {
-  let top = int.to_float(entry.start) *. y_scale
-  let height = int.to_float(entry.end - entry.start) *. y_scale
+  let top = int.to_float(entry.parts.first.start) *. y_scale
+  let height =
+    int.to_float(entry.parts.first.end - entry.parts.first.start) *. y_scale
   let left = int.to_float(entry.indent) *. x_scale
   let style =
     style_from_map([

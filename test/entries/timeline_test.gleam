@@ -9,27 +9,22 @@ import birl/duration
 
 pub fn lines_overlapping_test() {
   let line = fn(start: Int, end: Int) {
-    timeline.Line(
-      project: projects.Project(name: "", id: 0),
-      start: start,
-      end: end,
-      indent: 0,
-    )
+    timeline.LinePart(start: start, end: end)
   }
 
-  timeline.overlapping(line(0, 1), line(2, 3))
+  timeline.part_overlapping(line(0, 1), line(2, 3))
   |> should.be_false()
 
-  timeline.overlapping(line(2, 3), line(0, 1))
+  timeline.part_overlapping(line(2, 3), line(0, 1))
   |> should.be_false()
 
-  timeline.overlapping(line(0, 1), line(1, 2))
+  timeline.part_overlapping(line(0, 1), line(1, 2))
   |> should.be_true()
 
-  timeline.overlapping(line(0, 3), line(1, 2))
+  timeline.part_overlapping(line(0, 3), line(1, 2))
   |> should.be_true()
 
-  timeline.overlapping(line(2, 3), line(1, 2))
+  timeline.part_overlapping(line(2, 3), line(1, 2))
   |> should.be_true()
 }
 
