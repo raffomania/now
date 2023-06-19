@@ -1,5 +1,6 @@
 import nakai/html as h
 import nakai/html/attrs as a
+import non_empty_list
 import entries/timeline
 import entries/db_entries
 import gleam/list
@@ -19,6 +20,7 @@ pub fn view(entries: List(db_entries.EntryWithProject)) -> h.Node(_) {
     timeline
     |> map.values()
     |> list.map(render_line)
+    |> list.flat_map(non_empty_list.to_list)
 
   let rendered_labels =
     timeline.labels(timeline)
@@ -59,11 +61,15 @@ fn text_input(name: String, label: String) {
   )
 }
 
-fn render_line(entry: timeline.Line) -> h.Node(_) {
-  let top = int.to_float(entry.parts.first.start) *. y_scale
-  let height =
-    int.to_float(entry.parts.first.end - entry.parts.first.start) *. y_scale
-  let left = int.to_float(entry.indent) *. x_scale
+fn render_line(line: timeline.Line) -> non_empty_list.NonEmptyList(h.Node(_)) {
+  line.parts
+  |> non_empty_list.map(fn(part) { render_part(part, line.indent) })
+}
+
+fn render_part(part: timeline.LinePart, indent: Int) -> h.Node(_) {
+  let top = int.to_float(part.start) *. y_scale
+  let height = int.to_float(part.end - part.start) *. y_scale
+  let left = int.to_float(indent) *. x_scale
   let style =
     style_from_map([
       #("top", float.to_string(top) <> "rem"),

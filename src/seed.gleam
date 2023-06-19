@@ -51,7 +51,6 @@ fn test_data_projects() -> List(projects.Create) {
 fn test_data_entries(
   projects: List(projects.Project),
 ) -> List(db_entries.Create) {
-  let week = duration.weeks(1)
   let now = time.now()
   let assert Ok(project_now) =
     list.first(projects)
@@ -63,16 +62,20 @@ fn test_data_entries(
   [
     db_entries.Create(datetime: now, project_id: project_now),
     db_entries.Create(
-      datetime: time.subtract(
-        now,
-        week
-        |> duration.add(week),
-      ),
+      datetime: time.subtract(now, duration.days(2)),
+      project_id: project_knakk,
+    ),
+    db_entries.Create(
+      datetime: time.subtract(now, duration.days(3)),
       project_id: project_now,
     ),
     db_entries.Create(
-      datetime: time.subtract(now, week),
+      datetime: time.subtract(now, duration.days(6)),
       project_id: project_knakk,
+    ),
+    db_entries.Create(
+      datetime: time.subtract(now, duration.days(8)),
+      project_id: project_now,
     ),
   ]
 }
